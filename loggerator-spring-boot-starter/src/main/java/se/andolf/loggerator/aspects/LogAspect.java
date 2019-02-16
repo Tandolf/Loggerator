@@ -64,7 +64,7 @@ public class LogAspect {
         final LogData.LogDataBuilder current = stack.pop();
 
         Optional.ofNullable(stack.pollFirst()).ifPresentOrElse(first -> {
-            first.method(current.build());
+            first.push(current.build());
             stack.push(first);
         }, () -> log.info(asString(logBuilder.build())));
 

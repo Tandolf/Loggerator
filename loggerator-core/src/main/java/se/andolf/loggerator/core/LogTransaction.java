@@ -3,7 +3,6 @@ package se.andolf.loggerator.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.andolf.loggerator.models.LogData;
@@ -13,8 +12,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
 
-
-@Value
 public class LogTransaction {
 
     private final static Logger logger = LoggerFactory.getLogger("Transactions");
@@ -40,10 +37,7 @@ public class LogTransaction {
         final Object proceed = logEvent.proceed();
         final LogEvent current = logStack.pop();
 
-        Optional.ofNullable(logStack.pollFirst()).ifPresentOrElse(first -> {
-            first.mutate().method(current.getLogData());
-            logStack.push(first);
-        }, () -> logger.info(asString(logEvent.getLogData())));
+        Optional.ofNullable(logStack.peekLast()).ifPresentOrElse(first -> first.mutate().push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
 
         return proceed;
     }

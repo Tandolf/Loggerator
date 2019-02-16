@@ -57,18 +57,35 @@ public class SpringAOPLogDataTests {
                 .setObjectMapper(objectMapper)
                 .build();
 
-        final String methodName = "someMethodName";
-        final String otherMethodName = "someOtherMethodName";
+        final String methodName = "first";
+        final String otherMethodName = "second";
+        final String someOtherMethodName = "third";
         final Object[] args = {"someArg1", "someArg2"};
         final Object[] otherArgs = {"someOtherArg1", "someOtherArg2"};
 
-        final LogTransaction logTransaction = loggerator.createTransaction();
-
-        when(signature.getName()).thenReturn(methodName).thenReturn(otherMethodName);
-        when(joinPoint.getArgs()).thenReturn(args).thenReturn(otherArgs);
+        when(signature.getName())
+                .thenReturn(methodName)
+                .thenReturn(otherMethodName)
+                .thenReturn(someOtherMethodName);
+        when(joinPoint.getArgs())
+                .thenReturn(args)
+                .thenReturn(otherArgs);
 
         final LogEvent firstMethod = new SpringAopLogEvent(joinPoint);
         final LogEvent secondMethod = new SpringAopLogEvent(joinPoint);
+        final LogEvent thirdMethod = new SpringAopLogEvent(joinPoint);
+
+        final LogTransaction logTransaction = loggerator.createTransaction();
+
+        when(joinPoint.proceed())
+                .then(invocationOnMock -> logTransaction.execute(secondMethod))
+                .then(invocationOnMock -> logTransaction.execute(thirdMethod))
+                .thenReturn("someReturnValue");
+
+        final LogData method3 = LogData.builder()
+                .name(someOtherMethodName)
+                .args(otherArgs)
+                .build();
 
         final LogData method2 = LogData.builder()
                 .name(otherMethodName)
@@ -78,11 +95,8 @@ public class SpringAOPLogDataTests {
         final LogData method1 = LogData.builder()
                 .name(methodName)
                 .args(args)
-                .method(method2)
+                .push(method3).push(method2)
                 .build();
-
-
-        when(joinPoint.proceed()).then(invocationOnMock -> logTransaction.execute(secondMethod)).thenReturn("someReturnValue");
 
         logTransaction.execute(firstMethod);
 

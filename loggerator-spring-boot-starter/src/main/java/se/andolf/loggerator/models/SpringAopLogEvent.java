@@ -9,12 +9,12 @@ public class SpringAopLogEvent extends AbstractLogEvent implements LogEvent {
 
     public SpringAopLogEvent(ProceedingJoinPoint joinPoint) {
         this.joinPoint = joinPoint;
+        logDataBuilder.name(joinPoint.getSignature().getName())
+                .args(joinPoint.getArgs());
     }
 
     @Override
     public Object proceed() {
-        logDataBuilder.name(joinPoint.getSignature().getName())
-                .args(joinPoint.getArgs());
         try {
             return joinPoint.proceed();
         } catch (Throwable throwable) {

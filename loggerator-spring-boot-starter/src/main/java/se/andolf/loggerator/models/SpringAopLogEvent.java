@@ -2,24 +2,24 @@ package se.andolf.loggerator.models;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 
-import javax.validation.Valid;
-
-@Valid
 public class SpringAopLogEvent implements LogEvent {
 
     private ProceedingJoinPoint joinPoint;
+    private LogData.LogDataBuilder logDataBuilder;
     private LogData logData;
 
     public SpringAopLogEvent(ProceedingJoinPoint joinPoint) {
         this.joinPoint = joinPoint;
+        this.logDataBuilder = LogData.builder();
     }
 
     @Override
     public Object proceed() {
-        final LogData.LogDataBuilder dataBuilder = LogData.builder().name(joinPoint.getSignature().getName());
+        logDataBuilder.name(joinPoint.getSignature().getName())
+                .args(joinPoint.getArgs());
         try {
             final Object returnValues = joinPoint.proceed();
-            logData = dataBuilder.build();
+            logData = logDataBuilder.build();
             return returnValues;
         } catch (Throwable throwable) {
             //TODO: handle exception

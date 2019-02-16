@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
 import config.LoggerConfiguration;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 public class Loggerator {
 
     final static String LOGBACK = "ch.qos.logback.classic.LoggerContext[default]";
@@ -42,6 +44,7 @@ public class Loggerator {
             }
 
             objectMapper = new ObjectMapper();
+            objectMapper.setSerializationInclusion(NON_NULL);
 
             return new Loggerator();
         }

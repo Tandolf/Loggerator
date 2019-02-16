@@ -4,54 +4,44 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import se.andolf.loggerator.core.LogTransaction;
 import se.andolf.loggerator.core.Loggerator;
+import se.andolf.loggerator.models.LogData;
+import se.andolf.loggerator.models.LogEvent;
 import se.andolf.loggerator.models.SpringAopLogEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoggeratorApplicationTests {
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static org.mockito.Mockito.when;
 
+public class SpringAOPLogDataTests {
+
+    private static ObjectMapper objectMapper;
     private Signature signature;
     private ProceedingJoinPoint joinPoint;
 
-    @Before
-    public void init() {
-        signature = Mockito.mock(Signature.class);
-        joinPoint = Mockito.mock(ProceedingJoinPoint.class);
-        Mockito.when(joinPoint.getSignature()).thenReturn(signature);
+    @BeforeClass
+    public static void beforeClass() {
+        objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(NON_NULL);
     }
 
-	@Test
-    public void shouldExecuteEvent() throws Throwable {
-
-        final Loggerator loggerator = Loggerator.builder()
-                .build();
-
-        final LogTransaction logTransaction = loggerator.createTransaction();
-
-        final String expected = "someReturnValue";
-
-        final Signature signature = Mockito.mock(Signature.class);
-        Mockito.when(signature.getName()).thenReturn(expected);
-
-        final ProceedingJoinPoint joinPoint = Mockito.mock(ProceedingJoinPoint.class);
-        Mockito.when(joinPoint.getSignature()).thenReturn(signature);
-        Mockito.when(joinPoint.getSignature().getName()).thenReturn("someMethodName");
-        Mockito.when(joinPoint.proceed()).thenReturn(expected);
-
-
-        final SpringAopLogEvent logEvent = new SpringAopLogEvent(joinPoint);
-
-        Assert.assertEquals(expected, logTransaction.execute(logEvent));
+    @Before
+    public void before() {
+        signature = Mockito.mock(Signature.class);
+        joinPoint = Mockito.mock(ProceedingJoinPoint.class);
+        when(joinPoint.getSignature()).thenReturn(signature);
     }
 
     @Test
@@ -62,18 +52,24 @@ public class LoggeratorApplicationTests {
                 .setAppender(appender)
                 .build();
 
+        final String methodName = "someMethodName";
+        final Object[] args = {"someArg1", "someArg2"};
+
         final LogTransaction logTransaction = loggerator.createTransaction();
 
-        final String expected = "someReturnValue";
+        when(signature.getName()).thenReturn(methodName);
+        when(joinPoint.getArgs()).thenReturn(args);
 
-        Mockito.when(signature.getName()).thenReturn(expected);
-        Mockito.when(joinPoint.proceed()).thenReturn(expected);
+        final LogEvent logEvent = new SpringAopLogEvent(joinPoint);
 
-        final SpringAopLogEvent logEvent = new SpringAopLogEvent(joinPoint);
+        final LogData logData = LogData.builder()
+                .name(methodName)
+                .args(args)
+                .build();
 
         logTransaction.execute(logEvent);
 
-        Assert.assertEquals("{\"name\":\"someReturnValue\",\"args\":null,\"methods\":[]}", appender.logs.get(0));
+        Assert.assertEquals(objectMapper.writeValueAsString(logData), appender.logs.get(0));
     }
 
     private TestConsoleAppender getTestAppender() {

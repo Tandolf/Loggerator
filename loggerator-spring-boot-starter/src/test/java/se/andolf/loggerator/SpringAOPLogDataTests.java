@@ -4,10 +4,11 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class SpringAOPLogDataTests {
@@ -35,6 +37,8 @@ public class SpringAOPLogDataTests {
     public static void beforeClass() {
         objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(NON_NULL);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     }
 
     @Before
@@ -50,26 +54,39 @@ public class SpringAOPLogDataTests {
         final TestConsoleAppender appender = getTestAppender();
         final Loggerator loggerator = Loggerator.builder()
                 .setAppender(appender)
+                .setObjectMapper(objectMapper)
                 .build();
 
         final String methodName = "someMethodName";
+        final String otherMethodName = "someOtherMethodName";
         final Object[] args = {"someArg1", "someArg2"};
+        final Object[] otherArgs = {"someOtherArg1", "someOtherArg2"};
 
         final LogTransaction logTransaction = loggerator.createTransaction();
 
-        when(signature.getName()).thenReturn(methodName);
-        when(joinPoint.getArgs()).thenReturn(args);
+        when(signature.getName()).thenReturn(methodName).thenReturn(otherMethodName);
+        when(joinPoint.getArgs()).thenReturn(args).thenReturn(otherArgs);
 
-        final LogEvent logEvent = new SpringAopLogEvent(joinPoint);
+        final LogEvent firstMethod = new SpringAopLogEvent(joinPoint);
+        final LogEvent secondMethod = new SpringAopLogEvent(joinPoint);
 
-        final LogData logData = LogData.builder()
-                .name(methodName)
-                .args(args)
+        final LogData method2 = LogData.builder()
+                .name(otherMethodName)
+                .args(otherArgs)
                 .build();
 
-        logTransaction.execute(logEvent);
+        final LogData method1 = LogData.builder()
+                .name(methodName)
+                .args(args)
+                .method(method2)
+                .build();
 
-        Assert.assertEquals(objectMapper.writeValueAsString(logData), appender.logs.get(0));
+
+        when(joinPoint.proceed()).then(invocationOnMock -> logTransaction.execute(secondMethod)).thenReturn("someReturnValue");
+
+        logTransaction.execute(firstMethod);
+
+        assertEquals(objectMapper.writeValueAsString(method1), appender.logs.get(0));
     }
 
     private TestConsoleAppender getTestAppender() {

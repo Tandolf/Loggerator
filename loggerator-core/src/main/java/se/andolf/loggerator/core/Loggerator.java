@@ -7,21 +7,20 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.StaticLoggerBinder;
-import config.LoggerConfiguration;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public class Loggerator {
 
-    final static String LOGBACK = "ch.qos.logback.classic.LoggerContext[default]";
-    private static Logger logger;
-    private static ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
-    private Loggerator() {}
-
+    private Loggerator(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public static LoggeratorBuilder builder() {
         return new Loggerator.LoggeratorBuilder();
@@ -33,7 +32,9 @@ public class Loggerator {
 
     public static class LoggeratorBuilder {
 
+        private final static String LOGBACK = "ch.qos.logback.classic.LoggerContext[default]";
         private Appender<ILoggingEvent> appender;
+        private ObjectMapper objectMapper;
 
         public Loggerator build() {
 
@@ -43,25 +44,22 @@ public class Loggerator {
                 createLogbackLogger();
             }
 
-            objectMapper = new ObjectMapper();
-            objectMapper.setSerializationInclusion(NON_NULL);
+            if (objectMapper == null) {
+                objectMapper = new ObjectMapper();
+                objectMapper.setSerializationInclusion(NON_NULL);
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            }
 
-            return new Loggerator();
+            return new Loggerator(objectMapper);
         }
 
         private void createLogbackLogger() {
             final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-            final PatternLayoutEncoder pattern = new PatternLayoutEncoder();
-            pattern.setPattern("%msg");
-            pattern.setContext(lc);
-            pattern.start();
-
-            logger = (Logger) LoggerFactory.getLogger("Transactions");
+            final Logger logger = (Logger) LoggerFactory.getLogger("Transactions");
 
             if(appender == null) {
                 final ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
-                appender.setEncoder(pattern);
+                appender.setEncoder(getPatternLayoutEncoder(lc));
                 appender.setContext(lc);
                 appender.setName("Transactions");
                 appender.start();
@@ -74,12 +72,21 @@ public class Loggerator {
             logger.setAdditive(false);
         }
 
-        public LoggerConfiguration.LoggerConfigurationBuilder logger() {
-            return LoggerConfiguration.builder();
+        private PatternLayoutEncoder getPatternLayoutEncoder(LoggerContext lc) {
+            final PatternLayoutEncoder pattern = new PatternLayoutEncoder();
+            pattern.setPattern("%msg");
+            pattern.setContext(lc);
+            pattern.start();
+            return pattern;
         }
 
         public LoggeratorBuilder setAppender(Appender<ILoggingEvent> appender) {
             this.appender = appender;
+            return this;
+        }
+
+        public LoggeratorBuilder setObjectMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
             return this;
         }
     }

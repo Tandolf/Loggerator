@@ -60,16 +60,22 @@ public class SpringAOPLogDataTests {
         final String methodName = "first";
         final String otherMethodName = "second";
         final String someOtherMethodName = "third";
-        final Object[] args = {"someArg1", "someArg2"};
-        final Object[] otherArgs = {"someOtherArg1", "someOtherArg2"};
+        final Object[] firstArgs = {"firstArg1", "firstArg2"};
+        final Object[] secondArgs = {"secondArg1", "secondArg2"};
+        final Object[] thirdArgs = {"thirdArg1", "thirdArg2"};
+
+        final String packageName = this.getClass().getPackageName();
 
         when(signature.getName())
                 .thenReturn(methodName)
                 .thenReturn(otherMethodName)
                 .thenReturn(someOtherMethodName);
+        when(signature.getDeclaringTypeName())
+                .thenReturn(packageName);
         when(joinPoint.getArgs())
-                .thenReturn(args)
-                .thenReturn(otherArgs);
+                .thenReturn(firstArgs)
+                .thenReturn(secondArgs)
+                .thenReturn(thirdArgs);
 
         final LogEvent firstMethod = new SpringAopLogEvent(joinPoint);
         final LogEvent secondMethod = new SpringAopLogEvent(joinPoint);
@@ -83,18 +89,18 @@ public class SpringAOPLogDataTests {
                 .thenReturn("someReturnValue");
 
         final LogData method3 = LogData.builder()
-                .name(someOtherMethodName)
-                .args(otherArgs)
+                .name(packageName + "." + someOtherMethodName)
+                .args(thirdArgs)
                 .build();
 
         final LogData method2 = LogData.builder()
-                .name(otherMethodName)
-                .args(otherArgs)
+                .name(packageName + "." + otherMethodName)
+                .args(secondArgs)
                 .build();
 
         final LogData method1 = LogData.builder()
-                .name(methodName)
-                .args(args)
+                .name(packageName + "." + methodName)
+                .args(firstArgs)
                 .push(method3).push(method2)
                 .build();
 

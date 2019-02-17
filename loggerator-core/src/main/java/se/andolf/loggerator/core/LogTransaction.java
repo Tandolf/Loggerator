@@ -34,7 +34,9 @@ public class LogTransaction {
 
         logStack.push(logEvent);
 
+        logEvent.mutate().start(System.currentTimeMillis());
         final Object proceed = logEvent.proceed();
+        logEvent.mutate().end(System.currentTimeMillis());
         final LogEvent current = logStack.pop();
 
         Optional.ofNullable(logStack.peekLast()).ifPresentOrElse(first -> first.mutate().push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
@@ -46,7 +48,7 @@ public class LogTransaction {
         try {
             return objectMapper.writeValueAsString(logData);
         } catch (JsonProcessingException e) {
-            throw new InternalError();
+            throw new InternalError(e);
         }
     }
 }

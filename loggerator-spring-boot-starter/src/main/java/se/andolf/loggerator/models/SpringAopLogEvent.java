@@ -24,6 +24,10 @@ public class SpringAopLogEvent extends AbstractLogEvent implements LogEvent {
     }
 
     private String getName(Signature signature) {
-        return signature.getDeclaringTypeName() + "." + signature.getName();
+        final String name = signature.getName();
+        final String declaringTypeName = signature.getDeclaringTypeName();
+        if(declaringTypeName == null || name == null)
+            return null;
+        return declaringTypeName + "." + name;
     }
 }

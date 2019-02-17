@@ -30,18 +30,18 @@ public class LogTransaction {
             });
     }
 
-    public Object execute(LogEvent logEvent) {
+    public Object execute(LogEvent logEvent) throws Throwable {
 
         logStack.push(logEvent);
 
-        logEvent.mutate().start(System.currentTimeMillis());
-        final Object proceed = logEvent.proceed();
-        logEvent.mutate().end(System.currentTimeMillis());
-        final LogEvent current = logStack.pop();
-
-        Optional.ofNullable(logStack.peekLast()).ifPresentOrElse(first -> first.mutate().push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
-
-        return proceed;
+        logEvent.start(System.currentTimeMillis());
+        try {
+            return logEvent.proceed();
+        } finally {
+            logEvent.end(System.currentTimeMillis());
+            final LogEvent current = logStack.pop();
+            Optional.ofNullable(logStack.peekLast()).ifPresentOrElse(first -> first.push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
+        }
     }
 
     private String asString(LogData logData) {

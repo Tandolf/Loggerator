@@ -16,6 +16,8 @@ public class LogData {
     private Long start;
     private Long end;
     private Long duration;
+    private Object returnValue;
+    private boolean returnStatus;
 
     public static LogData.LogDataBuilder builder() {
         return new LogData.LogDataBuilder();
@@ -29,6 +31,8 @@ public class LogData {
         private Long start;
         private Long end;
         private Long duration;
+        private Object returnValue;
+        private boolean returnStatus;
 
         public LogData.LogDataBuilder name(String name) {
             this.name = name;
@@ -55,12 +59,22 @@ public class LogData {
             return this;
         }
 
+        public LogData.LogDataBuilder returnValue(Object returnValue) {
+            this.returnValue = returnValue;
+            return this;
+        }
+
+        public LogData.LogDataBuilder returnStatus(boolean returnStatus) {
+            this.returnStatus = returnStatus;
+            return this;
+        }
+
         public LogData build() {
             if(end != null && start != null) {
                  duration = end - start;
             }
 
-            return new LogData(name, args, methods, start, end, duration);
+            return new LogData(name, args, methods, start, end, duration, returnValue, returnStatus);
         }
     }
 }

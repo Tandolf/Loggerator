@@ -20,6 +20,7 @@ import se.andolf.loggerator.models.LogData;
 import se.andolf.loggerator.models.LogEvent;
 import se.andolf.loggerator.models.SpringAopLogEvent;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,7 @@ public class SpringAOPLogDataTests {
         signature = Mockito.mock(Signature.class);
         joinPoint = Mockito.mock(ProceedingJoinPoint.class);
         when(joinPoint.getSignature()).thenReturn(signature);
+        appender.logs.clear();
     }
 
     @Test
@@ -114,6 +116,36 @@ public class SpringAOPLogDataTests {
         assertNotNull(actual.getStart());
         assertNotNull(actual.getEnd());
         assertNotNull(actual.getDuration());
+    }
+
+    @Test
+    public void shouldLogReturnValueInLogData() throws Throwable {
+        final LogTransaction transaction = loggerator.createTransaction();
+
+        when(joinPoint.proceed()).thenReturn("someReturnValue");
+
+        transaction.execute(new SpringAopLogEvent(joinPoint));
+
+        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+
+        assertEquals("someReturnValue", actual.getReturnValue());
+    }
+
+    @Test
+    public void shouldLogExceptionIfProceedThrowsException() throws Throwable {
+        final LogTransaction transaction = loggerator.createTransaction();
+
+        when(joinPoint.proceed())
+                .thenThrow(new AccessDeniedException("Some exception")
+                        .initCause(new NullPointerException("There was a random null pointer")));
+
+        try {
+            transaction.execute(new SpringAopLogEvent(joinPoint));
+        } catch (Throwable throwable) {
+            final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+            assertEquals("NullPointerException: There was a random null pointer", actual.getReturnValue());
+            assertFalse(actual.isReturnStatus());
+        }
     }
 
     private static TestConsoleAppender getTestAppender() {

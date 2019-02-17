@@ -7,7 +7,7 @@ public abstract class AbstractLogEvent implements LogEvent {
 
     protected LogData.LogDataBuilder logDataBuilder = LogData.builder();
 
-    public abstract Object proceed();
+    public abstract Object proceed() throws Throwable;
 
     @Override
     public LogData getLogData() {
@@ -15,7 +15,17 @@ public abstract class AbstractLogEvent implements LogEvent {
     }
 
     @Override
-    public LogData.LogDataBuilder mutate() {
-        return logDataBuilder;
+    public void start(long start) {
+        logDataBuilder.start(start);
+    }
+
+    @Override
+    public void end(long end) {
+        logDataBuilder.end(end);
+    }
+
+    @Override
+    public void push(LogData logData) {
+        logDataBuilder.push(logData);
     }
 }

@@ -1,9 +1,13 @@
 package se.andolf.loggerator.models;
 
 public interface LogEvent {
-    Object proceed();
+    Object proceed() throws Throwable;
 
     LogData getLogData();
 
-    LogData.LogDataBuilder mutate();
+    void start(long currentTimeMillis);
+
+    void end(long currentTimeMillis);
+
+    void push(LogData logData);
 }

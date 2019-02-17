@@ -1,5 +1,6 @@
 package se.andolf.loggerator.models;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import se.andolf.loggerator.core.AbstractLogEvent;
@@ -15,11 +16,17 @@ public class SpringAopLogEvent extends AbstractLogEvent implements LogEvent {
     }
 
     @Override
-    public Object proceed() {
+    public Object proceed() throws Throwable {
+
         try {
-            return joinPoint.proceed();
-        } catch (Throwable throwable) {
-            throw new InternalError("Could not proceed correctly");
+            final Object returnValue = joinPoint.proceed();
+            logDataBuilder.returnValue(returnValue);
+            logDataBuilder.returnStatus(true);
+            return returnValue;
+        } catch (Throwable e) {
+            final String rootCauseStackTrace = ExceptionUtils.getRootCauseMessage(e);
+            logDataBuilder.returnValue(rootCauseStackTrace);
+            throw e;
         }
     }
 

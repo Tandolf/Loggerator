@@ -24,12 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 public class SpringAOPLogDataTests {
 
     private static ObjectMapper objectMapper;
+    private static Loggerator loggerator;
+    private static TestConsoleAppender appender;
     private Signature signature;
     private ProceedingJoinPoint joinPoint;
 
@@ -39,6 +41,13 @@ public class SpringAOPLogDataTests {
         objectMapper.setSerializationInclusion(NON_NULL);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
+        appender = getTestAppender();
+
+        loggerator = Loggerator.builder()
+                .setAppender(appender)
+                .setObjectMapper(objectMapper)
+                .build();
     }
 
     @Before
@@ -51,25 +60,24 @@ public class SpringAOPLogDataTests {
     @Test
     public void shouldLogJsonWhenExecuting() throws Throwable {
 
-        final TestConsoleAppender appender = getTestAppender();
-        final Loggerator loggerator = Loggerator.builder()
-                .setAppender(appender)
-                .setObjectMapper(objectMapper)
-                .build();
-
-        final String methodName = "first";
-        final String otherMethodName = "second";
-        final String someOtherMethodName = "third";
-        final Object[] args = {"someArg1", "someArg2"};
-        final Object[] otherArgs = {"someOtherArg1", "someOtherArg2"};
+        final String firstMethodName = "first";
+        final String secondMethodName = "second";
+        final String thirdMethodName = "third";
+        final Object[] firstArgs = {"firstArg1", "firstArg2"};
+        final Object[] secondArgs = {"secondArg1", "secondArg2"};
+        final Object[] thirdArgs = {"thirdArg1", "thirdArg2"};
+        final String packageName = this.getClass().getPackageName();
 
         when(signature.getName())
-                .thenReturn(methodName)
-                .thenReturn(otherMethodName)
-                .thenReturn(someOtherMethodName);
+                .thenReturn(firstMethodName)
+                .thenReturn(secondMethodName)
+                .thenReturn(thirdMethodName);
+        when(signature.getDeclaringTypeName())
+                .thenReturn(packageName);
         when(joinPoint.getArgs())
-                .thenReturn(args)
-                .thenReturn(otherArgs);
+                .thenReturn(firstArgs)
+                .thenReturn(secondArgs)
+                .thenReturn(thirdArgs);
 
         final LogEvent firstMethod = new SpringAopLogEvent(joinPoint);
         final LogEvent secondMethod = new SpringAopLogEvent(joinPoint);
@@ -82,28 +90,33 @@ public class SpringAOPLogDataTests {
                 .then(invocationOnMock -> logTransaction.execute(thirdMethod))
                 .thenReturn("someReturnValue");
 
-        final LogData method3 = LogData.builder()
-                .name(someOtherMethodName)
-                .args(otherArgs)
-                .build();
-
-        final LogData method2 = LogData.builder()
-                .name(otherMethodName)
-                .args(otherArgs)
-                .build();
-
-        final LogData method1 = LogData.builder()
-                .name(methodName)
-                .args(args)
-                .push(method3).push(method2)
-                .build();
-
         logTransaction.execute(firstMethod);
 
-        assertEquals(objectMapper.writeValueAsString(method1), appender.logs.get(0));
+        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+
+        assertEquals(2, actual.getMethods().size());
+        assertEquals(packageName + "." + firstMethodName, actual.getName());
+        assertArrayEquals(firstArgs, actual.getArgs());
+        assertEquals(packageName + "." + secondMethodName, actual.getMethods().peekFirst().getName());
+        assertArrayEquals(secondArgs, actual.getMethods().pollFirst().getArgs());
+        assertEquals(packageName + "." + thirdMethodName, actual.getMethods().peekFirst().getName());
+        assertArrayEquals(thirdArgs, actual.getMethods().pollFirst().getArgs());
+
     }
 
-    private TestConsoleAppender getTestAppender() {
+    @Test
+    public void shouldLogDataContainingTimeStamps() throws Throwable {
+        final LogTransaction transaction = loggerator.createTransaction();
+        transaction.execute(new SpringAopLogEvent(joinPoint));
+
+        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+
+        assertNotNull(actual.getStart());
+        assertNotNull(actual.getEnd());
+        assertNotNull(actual.getDuration());
+    }
+
+    private static TestConsoleAppender getTestAppender() {
 
         final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -121,7 +134,7 @@ public class SpringAOPLogDataTests {
         return testConsoleAppender;
     }
 
-    private class TestConsoleAppender extends ConsoleAppender<ILoggingEvent> {
+    private static class TestConsoleAppender extends ConsoleAppender<ILoggingEvent> {
 
         private List<String> logs = new ArrayList<>();
 

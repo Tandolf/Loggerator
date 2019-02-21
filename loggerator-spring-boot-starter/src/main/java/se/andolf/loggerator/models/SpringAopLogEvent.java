@@ -24,8 +24,7 @@ public class SpringAopLogEvent extends AbstractLogEvent implements LogEvent {
             logDataBuilder.returnStatus(true);
             return returnValue;
         } catch (Throwable e) {
-            final String rootCauseStackTrace = ExceptionUtils.getRootCauseMessage(e);
-            logDataBuilder.returnValue(rootCauseStackTrace);
+            logDataBuilder.returnValue(ExceptionUtils.getStackTrace(e));
             throw e;
         }
     }

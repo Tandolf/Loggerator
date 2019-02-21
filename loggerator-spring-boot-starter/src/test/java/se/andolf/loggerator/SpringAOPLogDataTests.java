@@ -136,8 +136,9 @@ public class SpringAOPLogDataTests {
             transaction.execute(new SpringAopLogEvent(joinPoint));
         } catch (Throwable throwable) {
             final LogData actual = getLogs();
-            assertEquals("NullPointerException: There was a random null pointer", actual.getReturnValue());
+            assertTrue(actual.getReturnValue().toString().contains("NullPointerException: There was a random null pointer"));
             assertFalse(actual.isReturnStatus());
+
         }
     }
 

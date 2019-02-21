@@ -17,18 +17,15 @@ public class MyController {
         this.myResource = myResource;
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/one", produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(method = RequestMethod.POST, path = "/add", produces = MediaType.TEXT_HTML_VALUE)
     @LogThis
     public String addEndpoint(@RequestBody AddBody numbers) {
-        return String.valueOf(myResource.add(numbers.getAddendOne(), numbers.getAddendTwo()));
+        return String.valueOf(myResource.add(numbers.getOne(), numbers.getTwo()));
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/two", produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(method = RequestMethod.GET, path = "/exception")
     @LogThis
-    public String getTwo() {
-        ThreadLocal<Integer> testValue = new ThreadLocal<>();
-        testValue.set(2);
-
-        return String.valueOf(testValue.get());
+    public void throwException() {
+        myResource.throwException();
     }
 }

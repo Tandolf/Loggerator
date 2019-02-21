@@ -17,9 +17,9 @@ import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import se.andolf.loggerator.core.LogTransaction;
 import se.andolf.loggerator.core.Loggerator;
-import se.andolf.loggerator.models.LogData;
+import se.andolf.loggerator.models.MethodData;
 import se.andolf.loggerator.models.LogEvent;
-import se.andolf.loggerator.models.SpringAopLogEvent;
+import se.andolf.loggerator.models.SpringMethodLogEvent;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -30,7 +30,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
-public class SpringAOPLogDataTests {
+public class SpringAOPMethodDataTests {
 
     private static ObjectMapper objectMapper;
     private static Loggerator loggerator;
@@ -71,11 +71,11 @@ public class SpringAOPLogDataTests {
         when(signature.getName()).thenReturn(name);
         when(signature.getDeclaringTypeName()).thenReturn(packageName);
 
-        final LogEvent logEvent = new SpringAopLogEvent(joinPoint);
+        final LogEvent logEvent = new SpringMethodLogEvent(joinPoint);
 
         logTransaction.execute(logEvent);
 
-        final LogData actual = getLogs();
+        final MethodData actual = getLogs();
 
         final String fullName = packageName.concat(".").concat(name);
 
@@ -90,11 +90,11 @@ public class SpringAOPLogDataTests {
 
         when(joinPoint.getArgs()).thenReturn(args);
 
-        final LogEvent logEvent = new SpringAopLogEvent(joinPoint);
+        final LogEvent logEvent = new SpringMethodLogEvent(joinPoint);
 
         logTransaction.execute(logEvent);
 
-        final LogData actual = getLogs();
+        final MethodData actual = getLogs();
 
         assertArrayEquals(args, actual.getArgs());
     }
@@ -102,9 +102,9 @@ public class SpringAOPLogDataTests {
     @Test
     public void shouldLogDataContainingTimeStamps() throws Throwable {
         final LogTransaction transaction = loggerator.createTransaction();
-        transaction.execute(new SpringAopLogEvent(joinPoint));
+        transaction.execute(new SpringMethodLogEvent(joinPoint));
 
-        final LogData actual = getLogs();
+        final MethodData actual = getLogs();
 
         assertNotNull(actual.getStart());
         assertNotNull(actual.getEnd());
@@ -117,9 +117,9 @@ public class SpringAOPLogDataTests {
 
         when(joinPoint.proceed()).thenReturn("someReturnValue");
 
-        transaction.execute(new SpringAopLogEvent(joinPoint));
+        transaction.execute(new SpringMethodLogEvent(joinPoint));
 
-        final LogData actual = getLogs();
+        final MethodData actual = getLogs();
 
         assertEquals("someReturnValue", actual.getReturnValue());
     }
@@ -133,9 +133,9 @@ public class SpringAOPLogDataTests {
                         .initCause(new NullPointerException("There was a random null pointer")));
 
         try {
-            transaction.execute(new SpringAopLogEvent(joinPoint));
+            transaction.execute(new SpringMethodLogEvent(joinPoint));
         } catch (Throwable throwable) {
-            final LogData actual = getLogs();
+            final MethodData actual = getLogs();
             assertTrue(actual.getReturnValue().toString().contains("NullPointerException: There was a random null pointer"));
             assertFalse(actual.isReturnStatus());
 
@@ -158,9 +158,9 @@ public class SpringAOPLogDataTests {
         when(signature.getDeclaringTypeName())
                 .thenReturn(packageName);
 
-        final LogEvent firstMethod = new SpringAopLogEvent(joinPoint);
-        final LogEvent secondMethod = new SpringAopLogEvent(joinPoint);
-        final LogEvent thirdMethod = new SpringAopLogEvent(joinPoint);
+        final LogEvent firstMethod = new SpringMethodLogEvent(joinPoint);
+        final LogEvent secondMethod = new SpringMethodLogEvent(joinPoint);
+        final LogEvent thirdMethod = new SpringMethodLogEvent(joinPoint);
 
         when(joinPoint.proceed())
                 .then(invocationOnMock -> logTransaction.execute(secondMethod))
@@ -169,12 +169,21 @@ public class SpringAOPLogDataTests {
 
         logTransaction.execute(firstMethod);
 
-        final LogData actual = getLogs();
+        final MethodData actual = getLogs();
 
         assertEquals(1, actual.getMethods().size());
         assertEquals(1, actual.getMethods().getFirst().getMethods().size());
         assertNull(actual.getMethods().getFirst().getMethods().getFirst().getMethods());
+    }
 
+    @Test
+    public void shouldLogThreadName() throws Throwable {
+        final Thread thread = Thread.currentThread();
+        final LogTransaction logTransaction = loggerator.createTransaction();
+        final SpringMethodLogEvent logEvent = new SpringMethodLogEvent(joinPoint);
+        logTransaction.execute(logEvent);
+        final MethodData logs = getLogs();
+        assertEquals("main", logs.getThread());
     }
 
     private static TestConsoleAppender getTestAppender() {
@@ -206,8 +215,8 @@ public class SpringAOPLogDataTests {
         }
     }
 
-    private LogData getLogs() throws IOException {
-        return objectMapper.readValue(appender.logs.get(0), LogData.class);
+    private MethodData getLogs() throws IOException {
+        return objectMapper.readValue(appender.logs.get(0), MethodData.class);
     }
 }
 

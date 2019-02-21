@@ -46,10 +46,10 @@ public class Loggerator {
 
             if (objectMapper == null) {
                 objectMapper = new ObjectMapper();
-                objectMapper.setSerializationInclusion(NON_NULL);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             }
 
+            objectMapper.setSerializationInclusion(NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             return new Loggerator(objectMapper);
         }
 
@@ -74,7 +74,7 @@ public class Loggerator {
 
         private PatternLayoutEncoder getPatternLayoutEncoder(LoggerContext lc) {
             final PatternLayoutEncoder pattern = new PatternLayoutEncoder();
-            pattern.setPattern("%msg");
+            pattern.setPattern("%msg%n");
             pattern.setContext(lc);
             pattern.start();
             return pattern;

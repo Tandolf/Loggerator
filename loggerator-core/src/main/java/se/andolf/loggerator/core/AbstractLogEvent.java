@@ -1,31 +1,18 @@
 package se.andolf.loggerator.core;
 
-import se.andolf.loggerator.models.LogData;
+import se.andolf.loggerator.models.LogBuilder;
+import se.andolf.loggerator.models.MethodData;
 import se.andolf.loggerator.models.LogEvent;
 
 public abstract class AbstractLogEvent implements LogEvent {
 
-    protected LogData.LogDataBuilder logDataBuilder = LogData.builder();
+    protected final LogBuilder builder;
+
+    public AbstractLogEvent(LogBuilder builder) {
+        this.builder = builder;
+    }
 
     public abstract Object proceed() throws Throwable;
 
-    @Override
-    public LogData getLogData() {
-        return logDataBuilder.build();
-    }
 
-    @Override
-    public void start(long start) {
-        logDataBuilder.start(start);
-    }
-
-    @Override
-    public void end(long end) {
-        logDataBuilder.end(end);
-    }
-
-    @Override
-    public void push(LogData logData) {
-        logDataBuilder.push(logData);
-    }
 }

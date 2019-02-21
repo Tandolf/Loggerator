@@ -7,7 +7,7 @@ import lombok.Value;
 @Builder
 public class AddBody {
 
-    private int addendOne;
-    private int addendTwo;
+    private int one;
+    private int two;
 
 }

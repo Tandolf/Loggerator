@@ -1,55 +1,38 @@
 package se.andolf.loggerator.models;
 
-import lombok.Value;
+import lombok.Getter;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Map;
 
-@Value
-public class RequestData implements LogData {
+@Getter
+public class RequestData extends BaseData {
 
     private final String url;
-    private final Long start;
-    private final Long end;
-    private final Long duration;
     private final boolean returnStatus;
-    private final Deque<LogData> methods;
     private final String httpMethods;
     private final Map<String, String> headers;
 
-    public static RequestData.Builder builder() {
-        return new RequestData.Builder();
+    private RequestData(Builder builder) {
+        super(builder.start, builder.end, builder.duration, builder.methods);
+        this.url = builder.url;
+        this.returnStatus = builder.returnStatus;
+        this.httpMethods = builder.httpMethod;
+        this.headers = builder.headers;
     }
 
-    public static class Builder {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder extends BaseData.Builder {
 
         private String url;
-        private Long start;
-        private Long end;
-        private Deque<LogData> methods = new ArrayDeque<>();
         private boolean returnStatus;
-        private Long duration;
         private String httpMethod;
         private Map<String, String> headers;
 
         public Builder url(String url) {
             this.url = url;
-            return this;
-        }
-
-        public RequestData.Builder push(LogData logData) {
-            methods.push(logData);
-            return this;
-        }
-
-        public RequestData.Builder start(long currentTimeMillis) {
-            this.start = currentTimeMillis;
-            return this;
-        }
-
-        public RequestData.Builder end(long currentTimeMillis) {
-            this.end = currentTimeMillis;
             return this;
         }
 
@@ -72,7 +55,7 @@ public class RequestData implements LogData {
             if(end != null && start != null) {
                 duration = end - start;
             }
-            return new RequestData(url, start, end, duration, returnStatus, methods, httpMethod, headers);
+            return new RequestData(this);
         }
     }
 }

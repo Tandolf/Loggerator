@@ -104,7 +104,7 @@ public class SpringAOPLogDataTests {
         final LogTransaction transaction = loggerator.createTransaction();
         transaction.execute(new SpringAopLogEvent(joinPoint));
 
-        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+        final LogData actual = getLogs();
 
         assertNotNull(actual.getStart());
         assertNotNull(actual.getEnd());
@@ -119,7 +119,7 @@ public class SpringAOPLogDataTests {
 
         transaction.execute(new SpringAopLogEvent(joinPoint));
 
-        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+        final LogData actual = getLogs();
 
         assertEquals("someReturnValue", actual.getReturnValue());
     }
@@ -135,7 +135,7 @@ public class SpringAOPLogDataTests {
         try {
             transaction.execute(new SpringAopLogEvent(joinPoint));
         } catch (Throwable throwable) {
-            final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+            final LogData actual = getLogs();
             assertEquals("NullPointerException: There was a random null pointer", actual.getReturnValue());
             assertFalse(actual.isReturnStatus());
         }
@@ -168,7 +168,7 @@ public class SpringAOPLogDataTests {
 
         logTransaction.execute(firstMethod);
 
-        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+        final LogData actual = getLogs();
 
         assertEquals(1, actual.getMethods().size());
         assertEquals(1, actual.getMethods().getFirst().getMethods().size());

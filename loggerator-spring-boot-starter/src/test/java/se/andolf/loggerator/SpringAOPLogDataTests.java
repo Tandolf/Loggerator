@@ -5,6 +5,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -20,6 +21,7 @@ import se.andolf.loggerator.models.LogData;
 import se.andolf.loggerator.models.LogEvent;
 import se.andolf.loggerator.models.SpringAopLogEvent;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,7 @@ public class SpringAOPLogDataTests {
         objectMapper.setSerializationInclusion(NON_NULL);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
 
         appender = getTestAppender();
 
@@ -60,50 +63,40 @@ public class SpringAOPLogDataTests {
     }
 
     @Test
-    public void shouldLogJsonWhenExecuting() throws Throwable {
-
-        final String firstMethodName = "first";
-        final String secondMethodName = "second";
-        final String thirdMethodName = "third";
-        final Object[] firstArgs = {"firstArg1", "firstArg2"};
-        final Object[] secondArgs = {"secondArg1", "secondArg2"};
-        final Object[] thirdArgs = {"thirdArg1", "thirdArg2"};
+    public void shouldLogFullName() throws Throwable {
+        final LogTransaction logTransaction = loggerator.createTransaction();
         final String packageName = this.getClass().getPackageName();
+        final String name = "someName";
 
-        when(signature.getName())
-                .thenReturn(firstMethodName)
-                .thenReturn(secondMethodName)
-                .thenReturn(thirdMethodName);
-        when(signature.getDeclaringTypeName())
-                .thenReturn(packageName);
-        when(joinPoint.getArgs())
-                .thenReturn(firstArgs)
-                .thenReturn(secondArgs)
-                .thenReturn(thirdArgs);
+        when(signature.getName()).thenReturn(name);
+        when(signature.getDeclaringTypeName()).thenReturn(packageName);
 
-        final LogEvent firstMethod = new SpringAopLogEvent(joinPoint);
-        final LogEvent secondMethod = new SpringAopLogEvent(joinPoint);
-        final LogEvent thirdMethod = new SpringAopLogEvent(joinPoint);
+        final LogEvent logEvent = new SpringAopLogEvent(joinPoint);
 
+        logTransaction.execute(logEvent);
+
+        final LogData actual = getLogs();
+
+        final String fullName = packageName.concat(".").concat(name);
+
+        assertEquals(fullName, actual.getName());
+    }
+
+    @Test
+    public void shouldLogInputArguments() throws Throwable {
         final LogTransaction logTransaction = loggerator.createTransaction();
 
-        when(joinPoint.proceed())
-                .then(invocationOnMock -> logTransaction.execute(secondMethod))
-                .then(invocationOnMock -> logTransaction.execute(thirdMethod))
-                .thenReturn("someReturnValue");
+        final String[] args = {"arg1, arg2"};
 
-        logTransaction.execute(firstMethod);
+        when(joinPoint.getArgs()).thenReturn(args);
 
-        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+        final LogEvent logEvent = new SpringAopLogEvent(joinPoint);
 
-        assertEquals(2, actual.getMethods().size());
-        assertEquals(packageName + "." + firstMethodName, actual.getName());
-        assertArrayEquals(firstArgs, actual.getArgs());
-        assertEquals(packageName + "." + secondMethodName, actual.getMethods().peekFirst().getName());
-        assertArrayEquals(secondArgs, actual.getMethods().pollFirst().getArgs());
-        assertEquals(packageName + "." + thirdMethodName, actual.getMethods().peekFirst().getName());
-        assertArrayEquals(thirdArgs, actual.getMethods().pollFirst().getArgs());
+        logTransaction.execute(logEvent);
 
+        final LogData actual = getLogs();
+
+        assertArrayEquals(args, actual.getArgs());
     }
 
     @Test
@@ -148,6 +141,41 @@ public class SpringAOPLogDataTests {
         }
     }
 
+    @Test
+    public void shouldLogThreeLogsNested() throws Throwable {
+        final LogTransaction logTransaction = loggerator.createTransaction();
+
+        final String firstMethodName = "first";
+        final String secondMethodName = "second";
+        final String thirdMethodName = "third";
+        final String packageName = this.getClass().getPackageName();
+
+        when(signature.getName())
+                .thenReturn(firstMethodName)
+                .thenReturn(secondMethodName)
+                .thenReturn(thirdMethodName);
+        when(signature.getDeclaringTypeName())
+                .thenReturn(packageName);
+
+        final LogEvent firstMethod = new SpringAopLogEvent(joinPoint);
+        final LogEvent secondMethod = new SpringAopLogEvent(joinPoint);
+        final LogEvent thirdMethod = new SpringAopLogEvent(joinPoint);
+
+        when(joinPoint.proceed())
+                .then(invocationOnMock -> logTransaction.execute(secondMethod))
+                .then(invocationOnMock -> logTransaction.execute(thirdMethod))
+                .thenReturn("");
+
+        logTransaction.execute(firstMethod);
+
+        final LogData actual = objectMapper.readValue(appender.logs.get(0), LogData.class);
+
+        assertEquals(1, actual.getMethods().size());
+        assertEquals(1, actual.getMethods().getFirst().getMethods().size());
+        assertNull(actual.getMethods().getFirst().getMethods().getFirst().getMethods());
+
+    }
+
     private static TestConsoleAppender getTestAppender() {
 
         final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -177,5 +205,8 @@ public class SpringAOPLogDataTests {
         }
     }
 
+    private LogData getLogs() throws IOException {
+        return objectMapper.readValue(appender.logs.get(0), LogData.class);
+    }
 }
 

@@ -40,7 +40,7 @@ public class LogTransaction {
         } finally {
             logEvent.end(System.currentTimeMillis());
             final LogEvent current = logStack.pop();
-            Optional.ofNullable(logStack.peekLast()).ifPresentOrElse(first -> first.push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
+            Optional.ofNullable(logStack.peekFirst()).ifPresentOrElse(first -> first.push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
         }
     }
 

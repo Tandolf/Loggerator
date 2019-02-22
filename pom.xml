@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>loggerator</artifactId>
-	<groupId>se.andolf</groupId>
+	<groupId>com.github.tandolf</groupId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
@@ -33,7 +33,7 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>se.andolf</groupId>
+				<groupId>com.github.tandolf</groupId>
 				<artifactId>loggerator-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>

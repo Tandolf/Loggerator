@@ -12,7 +12,7 @@
 
     <parent>
         <artifactId>loggerator</artifactId>
-        <groupId>se.andolf</groupId>
+        <groupId>com.github.tandolf</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 

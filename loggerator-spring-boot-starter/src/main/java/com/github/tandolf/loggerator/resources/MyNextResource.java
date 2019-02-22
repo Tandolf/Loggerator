@@ -1,0 +1,20 @@
+package com.github.tandolf.loggerator.resources;
+
+import com.github.tandolf.loggerator.models.annotations.LogThis;
+import org.springframework.stereotype.Component;
+
+import java.io.FileNotFoundException;
+
+@Component
+public class MyNextResource {
+
+    @LogThis
+    public int addAgain(int starting, int adding) {
+        return starting + adding;
+    }
+
+    @LogThis
+    public void throwDeeper() throws FileNotFoundException {
+        throw new FileNotFoundException();
+    }
+}

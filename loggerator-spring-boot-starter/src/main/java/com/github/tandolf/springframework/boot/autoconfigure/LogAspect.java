@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Aspect
-@Component
-@Slf4j
 public class LogAspect {
 
     private final Loggerator loggerator;

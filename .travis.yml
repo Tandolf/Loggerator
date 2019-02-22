@@ -21,4 +21,4 @@ addons:
 jobs:
   include:
     - stage: compile
-      script: ./mvnw clean package sonar:sonar
+      script: mvn clean package sonar:sonar

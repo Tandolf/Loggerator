@@ -3,8 +3,8 @@ package com.github.tandolf.loggerator.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tandolf.loggerator.models.LogData;
-import com.github.tandolf.loggerator.models.LogEvent;
+import com.github.tandolf.loggerator.core.models.LogData;
+import com.github.tandolf.loggerator.core.models.LogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

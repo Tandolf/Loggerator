@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.github.tandolf.loggerator.config.LoggeratorAutoConfig
+  com.github.tandolf.springframework.boot.autoconfigure.LoggeratorAutoConfig

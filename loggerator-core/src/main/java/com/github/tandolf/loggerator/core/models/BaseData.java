@@ -2,6 +2,7 @@ package com.github.tandolf.loggerator.core.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -9,6 +10,7 @@ import java.util.Deque;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public abstract class BaseData implements LogData {
 
     private Long start;

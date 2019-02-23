@@ -2,6 +2,7 @@ package com.github.tandolf.springframework.boot.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.github.tandolf.loggerator.core.LogAspect;
 import com.github.tandolf.loggerator.core.Loggerator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

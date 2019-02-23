@@ -1,8 +1,5 @@
-package com.github.tandolf.springframework.boot.autoconfigure;
+package com.github.tandolf.loggerator.core.models;
 
-import com.github.tandolf.loggerator.core.models.LogData;
-import com.github.tandolf.loggerator.core.models.LogEvent;
-import com.github.tandolf.loggerator.core.models.MethodData;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;

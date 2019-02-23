@@ -1,11 +1,10 @@
 package com.github.tandolf.loggerator.core.models;
 
 import lombok.Getter;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class MethodData extends BaseData {
 
     private MethodData(Builder builder) {
@@ -29,7 +28,6 @@ public class MethodData extends BaseData {
 
     public static class Builder extends BaseData.Builder {
 
-        private Deque<LogData> methods = new ArrayDeque<>();
         private String name;
         private Object[] args;
         private Object returnValue;

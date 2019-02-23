@@ -1,14 +1,11 @@
-package com.github.tandolf.springframework.boot.autoconfigure;
+package com.github.tandolf.loggerator.core;
 
 
-import com.github.tandolf.loggerator.core.LogTransaction;
-import com.github.tandolf.loggerator.core.Loggerator;
-import lombok.extern.slf4j.Slf4j;
+import com.github.tandolf.loggerator.core.models.SpringMethodLogEvent;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Aspect
 public class LogAspect {

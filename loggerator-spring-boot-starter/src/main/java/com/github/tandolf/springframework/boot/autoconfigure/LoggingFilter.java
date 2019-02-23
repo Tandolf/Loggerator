@@ -2,8 +2,6 @@ package com.github.tandolf.springframework.boot.autoconfigure;
 
 import com.github.tandolf.loggerator.core.LogTransaction;
 import com.github.tandolf.loggerator.core.Loggerator;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
@@ -38,7 +36,7 @@ public class LoggingFilter extends CommonsRequestLoggingFilter {
         try {
             transaction.execute(logEvent);
         } catch (Throwable throwable) {
-            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ServletException(throwable);
         }
     }
 

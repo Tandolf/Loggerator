@@ -22,7 +22,6 @@ public class SpringRequestLogEvent implements HttpRequestLogEvent, LogEvent {
     private boolean includeQueryString;
     private int maxPayloadLength = 4096;
 
-
     public SpringRequestLogEvent(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         this.request = request;
         this.response = response;

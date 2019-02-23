@@ -44,11 +44,6 @@ public class MethodData extends BaseData {
             return this;
         }
 
-        public Builder push(LogData logData) {
-            methods.push(logData);
-            return this;
-        }
-
         public Builder returnValue(Object returnValue) {
             this.returnValue = returnValue;
             return this;

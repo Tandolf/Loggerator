@@ -6,10 +6,7 @@ import com.github.tandolf.loggerator.testserver.models.AddBody;
 import com.github.tandolf.loggerator.testserver.resources.MyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class MyController {
@@ -21,14 +18,14 @@ public class MyController {
         this.myResource = myResource;
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/add", produces = MediaType.TEXT_HTML_VALUE)
     @LogThis
+    @PostMapping(path = "/add", produces = MediaType.TEXT_HTML_VALUE)
     public String addEndpoint(@RequestBody AddBody numbers) {
         return String.valueOf(myResource.add(numbers.getOne(), numbers.getTwo()));
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/exception")
     @LogThis
+    @PostMapping(path = "/exception")
     public void throwException() {
         myResource.throwException();
     }

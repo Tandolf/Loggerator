@@ -32,7 +32,7 @@ public class Loggerator {
 
     public static class LoggeratorBuilder {
 
-        private final static String LOGBACK = "ch.qos.logback.classic.LoggerContext[default]";
+        private static final String LOGBACK = "ch.qos.logback.classic.LoggerContext[default]";
         private Appender<ILoggingEvent> appender;
         private ObjectMapper objectMapper;
 
@@ -58,12 +58,12 @@ public class Loggerator {
             final Logger logger = (Logger) LoggerFactory.getLogger("Transactions");
 
             if(appender == null) {
-                final ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
-                appender.setEncoder(getPatternLayoutEncoder(lc));
-                appender.setContext(lc);
-                appender.setName("Transactions");
-                appender.start();
-                logger.addAppender(appender);
+                final ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
+                consoleAppender.setEncoder(getPatternLayoutEncoder(lc));
+                consoleAppender.setContext(lc);
+                consoleAppender.setName("Transactions");
+                consoleAppender.start();
+                logger.addAppender(consoleAppender);
             } else {
                 logger.addAppender(appender);
             }

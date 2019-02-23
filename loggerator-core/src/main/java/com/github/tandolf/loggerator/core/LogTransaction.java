@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class LogTransaction {
 
-    private final static Logger logger = LoggerFactory.getLogger("Transactions");
+    private static final Logger logger = LoggerFactory.getLogger("Transactions");
 
     private static ThreadLocal<Deque<LogEvent>> threadLocal = new ThreadLocal<>();
     private final ObjectMapper objectMapper;

@@ -2,7 +2,6 @@ package com.github.tandolf.springframework.boot.autoconfigure;
 
 import com.github.tandolf.loggerator.core.LogTransaction;
 import com.github.tandolf.loggerator.core.Loggerator;
-import com.github.tandolf.loggerator.core.models.LogEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
@@ -13,15 +12,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 public class LoggingFilter extends CommonsRequestLoggingFilter {
 
     private final Loggerator loggerator;
-    private LoggeratorProperties loggeratorProperties;
 
-    public LoggingFilter(Loggerator loggerator, LoggeratorProperties loggeratorProperties) {
-        this.loggeratorProperties = loggeratorProperties;
+    public LoggingFilter(Loggerator loggerator) {
         this.loggerator = loggerator;
     }
 
@@ -33,16 +29,17 @@ public class LoggingFilter extends CommonsRequestLoggingFilter {
         if (isIncludePayload() && isFirstRequest && !(request instanceof ContentCachingRequestWrapper)) {
             requestToUse = new ContentCachingRequestWrapper(request, getMaxPayloadLength());
         }
+        final SpringRequestLogEvent logEvent = new SpringRequestLogEvent(requestToUse, response, filterChain);
+        logEvent.setMaxPayloadLength(getMaxPayloadLength());
+        logEvent.includePayload(isIncludePayload());
+        logEvent.includeQueryString(isIncludeQueryString());
 
         final LogTransaction transaction = loggerator.createTransaction();
-        final LogEvent logEvent = new SpringRequestLogEvent(requestToUse, response, filterChain);
         try {
             transaction.execute(logEvent);
         } catch (Throwable throwable) {
-            throw HttpServerErrorException.InternalServerError
-                    .create(HttpStatus.INTERNAL_SERVER_ERROR, throwable.getMessage(), null, null, Charset.defaultCharset());
+            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     @Override

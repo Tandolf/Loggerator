@@ -41,11 +41,11 @@ public class LoggeratorAutoConfig {
     @Bean
     @ConditionalOnProperty(prefix = "loggerator", name = "filter", havingValue = "true", matchIfMissing = true)
     public LoggingFilter loggingFilter(Loggerator loggerator, LoggeratorProperties properties) {
-        final LoggingFilter loggingFilter = new LoggingFilter(loggerator, properties);
-        loggingFilter.setIncludeQueryString(true);
-        loggingFilter.setIncludePayload(true);
+        final LoggingFilter loggingFilter = new LoggingFilter(loggerator);
+        loggingFilter.setIncludeQueryString(properties.isIncludeQueryString());
+        loggingFilter.setIncludePayload(properties.isIncludePayload());
+        loggingFilter.setMaxPayloadLength(properties.getMaxPayloadLength());
         loggingFilter.setIncludeClientInfo(true);
-        loggingFilter.setMaxPayloadLength(4096);
         return loggingFilter;
     }
 

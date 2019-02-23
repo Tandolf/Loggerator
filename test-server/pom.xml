@@ -6,7 +6,6 @@
 		<artifactId>loggerator</artifactId>
 		<groupId>com.github.tandolf</groupId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath/>
 	</parent>
 
 	<artifactId>test-server</artifactId>

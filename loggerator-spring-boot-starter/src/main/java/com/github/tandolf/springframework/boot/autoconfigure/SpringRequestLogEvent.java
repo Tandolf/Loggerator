@@ -29,14 +29,16 @@ public class SpringRequestLogEvent implements HttpRequestLogEvent, LogEvent {
         this.filterChain = filterChain;
 
         builder = RequestData.builder()
-                .url(request.getRequestURL().toString())
                 .headers(RequestUtils.getHeaders(request))
                 .httpMethod(request.getMethod());
     }
 
     @Override
     public Object proceed() throws Throwable {
+        builder.url(getUrl(request));
+
         filterChain.doFilter(request, response);
+
         builder.body(getBody(request));
         builder.returnStatus(true);
         return null;

@@ -14,3 +14,5 @@ All properties should be prefixed with "loggerator."
 | filter.include-payload            | false             | Will log incoming payloads if filter is active |
 | filter.include-query-string       | false             | Will append and log the query string ontop of incoming url |
 | filter.max-payload-length         | 4096              | Set max length of the payload to log (bytes) |
+| filter.url-patterns.include       | {}                | ant pattern define what url's filter should work on |
+| filter.url-patterns.exclude       | {}                | ant pattern define what url's filter should not work on |

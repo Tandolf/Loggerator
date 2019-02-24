@@ -25,7 +25,7 @@ public class MyController {
     }
 
     @LogThis
-    @PostMapping(path = "/exception")
+    @GetMapping(path = "/exception")
     public void throwException() {
         myResource.throwException();
     }

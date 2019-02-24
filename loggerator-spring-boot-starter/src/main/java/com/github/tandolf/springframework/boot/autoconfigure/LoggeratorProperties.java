@@ -17,6 +17,14 @@ public class LoggeratorProperties {
         private boolean includePayload;
         private boolean includeQueryString;
         private int maxPayloadLength = 4096;
+        private UrlPatterns urlPatterns = new UrlPatterns();
+
+        @Data
+        public static class UrlPatterns {
+
+            private String[] included = {};
+            private String[] excluded = {};
+        }
     }
 }
 

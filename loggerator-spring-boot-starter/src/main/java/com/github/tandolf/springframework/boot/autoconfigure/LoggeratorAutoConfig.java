@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -38,7 +39,6 @@ public class LoggeratorAutoConfig {
         return objectMapper;
     }
 
-    @Bean
     @ConditionalOnProperty(prefix = "loggerator", name = "filter", havingValue = "true", matchIfMissing = true)
     public LoggingFilter loggingFilter(Loggerator loggerator, LoggeratorProperties properties) {
         final LoggingFilter loggingFilter = new LoggingFilter(loggerator);
@@ -46,7 +46,19 @@ public class LoggeratorAutoConfig {
         loggingFilter.setIncludePayload(properties.getFilter().isIncludePayload());
         loggingFilter.setMaxPayloadLength(properties.getFilter().getMaxPayloadLength());
         loggingFilter.setIncludeClientInfo(true);
+        loggingFilter.addExcludedUrlPatterns(properties.getFilter().getUrlPatterns().getExcluded());
         return loggingFilter;
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "loggerator", name = "filter", havingValue = "true", matchIfMissing = true)
+    public FilterRegistrationBean someFilterRegistration(Loggerator loggerator, LoggeratorProperties properties) {
+        final FilterRegistrationBean<LoggingFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(loggingFilter(loggerator, properties));
+        registration.addUrlPatterns(properties.getFilter().getUrlPatterns().getIncluded());
+        registration.addInitParameter("paramName", "paramValue");
+        registration.setName("transactionFilter");
+        return registration;
     }
 
     @Bean

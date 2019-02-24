@@ -85,7 +85,7 @@ public class SpringRequestLogEvent implements HttpRequestLogEvent, LogEvent {
     @Override
     public String getUrl(HttpServletRequest request) {
         final StringBuffer requestURL = request.getRequestURL();
-        if(includeQueryString) {
+        if(includeQueryString && request.getQueryString() != null) {
             requestURL.append("?").append(request.getQueryString());
         }
         return requestURL.toString();

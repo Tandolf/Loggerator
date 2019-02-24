@@ -12,6 +12,7 @@ public class RequestData extends BaseData {
     private final String httpMethods;
     private final Map<String, String> headers;
     private final String body;
+    private final String remoteAddr;
 
     private RequestData(Builder builder) {
         super(builder.start, builder.end, builder.duration, builder.methods);
@@ -20,6 +21,7 @@ public class RequestData extends BaseData {
         this.httpMethods = builder.httpMethod;
         this.headers = builder.headers;
         this.body = builder.body;
+        this.remoteAddr = builder.remoteAddr;
     }
 
     public static Builder builder() {
@@ -33,6 +35,7 @@ public class RequestData extends BaseData {
         private String httpMethod;
         private Map<String, String> headers;
         private String body;
+        private String remoteAddr;
 
         public Builder url(String url) {
             this.url = url;
@@ -56,6 +59,11 @@ public class RequestData extends BaseData {
 
         public Builder body(String body) {
             this.body = body;
+            return this;
+        }
+
+        public Builder remoteAddr(String remoteAddr) {
+            this.remoteAddr = remoteAddr;
             return this;
         }
 

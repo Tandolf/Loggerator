@@ -107,4 +107,15 @@ class SpringRequestLogEventTest {
         assertEquals(payload.getBytes()[0], firstByte);
         assertEquals(payload.getBytes()[1], secondByte);
     }
+
+    @Test
+    void shouldLogRemoteAddr() {
+        final String remoteAddr = "192.168.0.1";
+        request.setRemoteAddr(remoteAddr);
+        final SpringRequestLogEvent logEvent = new SpringRequestLogEvent(request, response, filterChain);
+        final RequestData logData = (RequestData) logEvent.getLogData();
+        assertEquals(remoteAddr, logData.getRemoteAddr());
+
+    }
+
 }

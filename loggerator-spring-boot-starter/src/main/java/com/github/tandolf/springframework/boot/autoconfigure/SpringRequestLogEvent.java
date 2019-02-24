@@ -29,6 +29,7 @@ public class SpringRequestLogEvent implements HttpRequestLogEvent, LogEvent {
 
         builder = RequestData.builder()
                 .headers(RequestUtils.getHeaders(request))
+                .remoteAddr(request.getRemoteAddr())
                 .httpMethod(request.getMethod());
     }
 

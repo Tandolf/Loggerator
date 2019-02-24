@@ -8,10 +8,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LoggeratorProperties {
 
     private boolean prettyPrint;
-    private boolean filter = true;
-    private boolean includePayload;
-    private boolean includeQueryString;
-    private int maxPayloadLength = 4096;
+    private Filter filter;
+
+    @Data
+    public static class Filter {
+
+        private boolean active = true;
+        private boolean includePayload;
+        private boolean includeQueryString;
+        private int maxPayloadLength = 4096;
+    }
 }
 
 

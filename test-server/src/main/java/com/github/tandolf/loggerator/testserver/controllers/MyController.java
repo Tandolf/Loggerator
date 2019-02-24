@@ -24,7 +24,7 @@ public class MyController {
         return String.valueOf(myResource.add(numbers.getOne(), numbers.getTwo()));
     }
 
-    @LogThis
+    @LogThis(timed = false)
     @GetMapping(path = "/exception")
     public void throwException() {
         myResource.throwException();

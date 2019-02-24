@@ -39,8 +39,7 @@ public class LoggeratorAutoConfig {
         return objectMapper;
     }
 
-    @ConditionalOnProperty(prefix = "loggerator", name = "filter", havingValue = "true", matchIfMissing = true)
-    public LoggingFilter loggingFilter(Loggerator loggerator, LoggeratorProperties properties) {
+    private LoggingFilter loggingFilter(Loggerator loggerator, LoggeratorProperties properties) {
         final LoggingFilter loggingFilter = new LoggingFilter(loggerator);
         loggingFilter.setIncludeQueryString(properties.getFilter().isIncludeQueryString());
         loggingFilter.setIncludePayload(properties.getFilter().isIncludePayload());

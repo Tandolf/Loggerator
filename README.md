@@ -16,3 +16,9 @@ All properties should be prefixed with "loggerator."
 | filter.max-payload-length         | 4096              | Set max length of the payload to log (bytes) |
 | filter.url-patterns.include       | {}                | ant pattern define what url's filter should work on |
 | filter.url-patterns.exclude       | {}                | ant pattern define what url's filter should not work on |
+
+### @LogThis
+
+Method annotation to use when you want to log a method. 
+
+Has the property *timed* (deafult: true) if you wish to disable the logging of execution time on that specific method invocation.

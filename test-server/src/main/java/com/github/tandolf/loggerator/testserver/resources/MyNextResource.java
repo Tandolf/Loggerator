@@ -13,7 +13,7 @@ public class MyNextResource {
         return starting + adding;
     }
 
-    @LogThis
+    @LogThis(timed = false)
     public void throwDeeper() throws FileNotFoundException {
         throw new FileNotFoundException();
     }

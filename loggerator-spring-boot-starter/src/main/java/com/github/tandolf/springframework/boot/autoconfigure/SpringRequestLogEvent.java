@@ -49,13 +49,13 @@ public class SpringRequestLogEvent implements HttpRequestLogEvent, LogEvent {
     }
 
     @Override
-    public void start(long currentTimeMillis) {
-        builder.start(System.currentTimeMillis());
+    public void start(long start) {
+        builder.start(start);
     }
 
     @Override
-    public void end(long currentTimeMillis) {
-        builder.end(System.currentTimeMillis());
+    public void end(long end) {
+        builder.end(end);
     }
 
     @Override

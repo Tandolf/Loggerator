@@ -21,7 +21,7 @@ public class MyResource {
         return myNextResource.addAgain(starting, adding);
     }
 
-    @LogThis
+    @LogThis(timed = false)
     public String throwException() {
         try {
             myNextResource.throwDeeper();

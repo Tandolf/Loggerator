@@ -31,17 +31,35 @@ public class LogTransaction {
     }
 
     public Object execute(LogEvent logEvent) throws Throwable {
+        return execute(logEvent, true);
+    }
+
+    public Object execute(LogEvent logEvent, boolean isTimed) throws Throwable {
 
         logStack.push(logEvent);
 
+        try {
+            if(isTimed)
+                return timedInvoke(logEvent);
+            else
+                return invoke(logEvent);
+        } finally {
+            final LogEvent current = logStack.pop();
+            Optional.ofNullable(logStack.peekFirst()).ifPresentOrElse(first -> first.push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
+        }
+    }
+
+    private Object timedInvoke(LogEvent logEvent) throws Throwable {
         logEvent.start(System.currentTimeMillis());
         try {
             return logEvent.proceed();
         } finally {
             logEvent.end(System.currentTimeMillis());
-            final LogEvent current = logStack.pop();
-            Optional.ofNullable(logStack.peekFirst()).ifPresentOrElse(first -> first.push(current.getLogData()), () -> logger.info(asString(logEvent.getLogData())));
         }
+    }
+
+    private Object invoke(LogEvent logEvent) throws Throwable {
+        return logEvent.proceed();
     }
 
     private String asString(LogData logData) {

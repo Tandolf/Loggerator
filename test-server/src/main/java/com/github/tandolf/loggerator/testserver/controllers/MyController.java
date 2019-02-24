@@ -29,4 +29,10 @@ public class MyController {
     public void throwException() {
         myResource.throwException();
     }
+
+    @LogThis()
+    @GetMapping(path = "/wildException")
+    public void wildException(@RequestBody AddBody numbers) {
+        throw new NullPointerException();
+    }
 }

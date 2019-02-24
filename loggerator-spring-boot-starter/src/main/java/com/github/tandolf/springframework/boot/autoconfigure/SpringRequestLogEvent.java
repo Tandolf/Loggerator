@@ -37,9 +37,12 @@ public class SpringRequestLogEvent implements HttpRequestLogEvent, LogEvent {
     public Object proceed() throws Throwable {
         builder.url(getUrl(request));
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            builder.body(getBody(request));
+        }
 
-        builder.body(getBody(request));
         builder.returnStatus(true);
         return null;
     }

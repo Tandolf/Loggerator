@@ -19,8 +19,9 @@ public class LogTransaction {
     private static ThreadLocal<Deque<LogEvent>> threadLocal = new ThreadLocal<>();
     private final ObjectMapper objectMapper;
     private final Deque<LogEvent> logStack;
+    private final boolean timeTransactions;
 
-    public LogTransaction(ObjectMapper objectMapper) {
+    public LogTransaction(ObjectMapper objectMapper, boolean timeTransactions) {
         this.objectMapper = objectMapper;
 
         logStack = Optional.ofNullable(threadLocal.get())
@@ -28,18 +29,15 @@ public class LogTransaction {
                 threadLocal.set(new ArrayDeque<>());
                 return threadLocal.get();
             });
+        this.timeTransactions = timeTransactions;
     }
 
     public Object execute(LogEvent logEvent) throws Throwable {
-        return execute(logEvent, true);
-    }
-
-    public Object execute(LogEvent logEvent, boolean isTimed) throws Throwable {
 
         logStack.push(logEvent);
 
         try {
-            if(isTimed)
+            if(logEvent.isTimed() && timeTransactions)
                 return timedInvoke(logEvent);
             else
                 return invoke(logEvent);

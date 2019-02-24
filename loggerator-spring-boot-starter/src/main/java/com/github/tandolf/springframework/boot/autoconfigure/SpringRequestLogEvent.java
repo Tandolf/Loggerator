@@ -64,6 +64,11 @@ public class SpringRequestLogEvent implements HttpRequestLogEvent, LogEvent {
     }
 
     @Override
+    public boolean isTimed() {
+        return true;
+    }
+
+    @Override
     public String getBody(HttpServletRequest request){
         if(includePayload) {
             return getMessagePayload(request);

@@ -17,41 +17,27 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 public class Loggerator {
 
     private ObjectMapper objectMapper;
+    private boolean timeTransactions;
 
-    private Loggerator(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    private Loggerator(Builder builder) {
+        this.objectMapper = builder.objectMapper;
+        this.timeTransactions = builder.timeTransactions;
     }
 
-    public static LoggeratorBuilder builder() {
-        return new Loggerator.LoggeratorBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
     public LogTransaction createTransaction() {
-        return new LogTransaction(objectMapper);
+        return new LogTransaction(objectMapper, timeTransactions);
     }
 
-    public static class LoggeratorBuilder {
+    public static class Builder {
 
         private static final String LOGBACK = "ch.qos.logback.classic.LoggerContext[default]";
         private Appender<ILoggingEvent> appender;
         private ObjectMapper objectMapper;
-
-        public Loggerator build() {
-
-            final StaticLoggerBinder binder = StaticLoggerBinder.getSingleton();
-
-            if(LOGBACK.equals(binder.getLoggerFactory().toString())) {
-                createLogbackLogger();
-            }
-
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper();
-            }
-
-            objectMapper.setSerializationInclusion(NON_NULL);
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            return new Loggerator(objectMapper);
-        }
+        private boolean timeTransactions = true;
 
         private void createLogbackLogger() {
             final LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -80,14 +66,36 @@ public class Loggerator {
             return pattern;
         }
 
-        public LoggeratorBuilder setAppender(Appender<ILoggingEvent> appender) {
+        public Builder setAppender(Appender<ILoggingEvent> appender) {
             this.appender = appender;
             return this;
         }
 
-        public LoggeratorBuilder setObjectMapper(ObjectMapper objectMapper) {
+        public Builder setObjectMapper(ObjectMapper objectMapper) {
             this.objectMapper = objectMapper;
             return this;
+        }
+
+        public Builder timeTransactions(boolean timed) {
+            this.timeTransactions = timed;
+            return this;
+        }
+
+        public Loggerator build() {
+
+            final StaticLoggerBinder binder = StaticLoggerBinder.getSingleton();
+
+            if(LOGBACK.equals(binder.getLoggerFactory().toString())) {
+                createLogbackLogger();
+            }
+
+            if (objectMapper == null) {
+                objectMapper = new ObjectMapper();
+            }
+
+            objectMapper.setSerializationInclusion(NON_NULL);
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            return new Loggerator(this);
         }
     }
 }

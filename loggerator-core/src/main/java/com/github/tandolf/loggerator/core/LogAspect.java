@@ -30,7 +30,7 @@ public class LogAspect {
         final boolean isTimed = logThis.timed();
 
         final LogTransaction transaction = loggerator.createTransaction();
-        final SpringMethodLogEvent logEvent = new SpringMethodLogEvent(joinPoint);
-        return transaction.execute(logEvent, isTimed);
+        final SpringMethodLogEvent logEvent = new SpringMethodLogEvent(joinPoint, isTimed);
+        return transaction.execute(logEvent);
     }
 }

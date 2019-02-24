@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.tandolf.loggerator.core.LogAspect;
 import com.github.tandolf.loggerator.core.Loggerator;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -22,15 +21,14 @@ public class LoggeratorAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public Loggerator loggerator(@Qualifier("loggeratorObjectMapper") ObjectMapper objectMapper) {
+    public Loggerator loggerator(LoggeratorProperties properties) {
         return Loggerator.builder()
-                .setObjectMapper(objectMapper)
+                .setObjectMapper(objectMapper(properties))
+                .timeTransactions(properties.isTimeTransactions())
                 .build();
     }
 
-    @Bean
-    @Qualifier("loggeratorObjectMapper")
-    public ObjectMapper objectMapper(LoggeratorProperties properties) {
+    private ObjectMapper objectMapper(LoggeratorProperties properties) {
         final ObjectMapper objectMapper = new ObjectMapper();
 
         if(properties.isPrettyPrint()) {

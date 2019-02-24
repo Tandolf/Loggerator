@@ -110,6 +110,16 @@ class LogAspectTest {
         assertEquals(1, latest.getMethods().size());
     }
 
+    @Test
+    @DisplayName("If timed = false then no start, end and duration")
+    void shouldNotTimeMethodCalls() {
+        stubProxy.noTime();
+        final MethodData latest = appender.getLatest();
+        assertNull(latest.getStart());
+        assertNull(latest.getEnd());
+        assertNull(latest.getDuration());
+    }
+
     public class Stub {
 
         private Stub self;
@@ -126,6 +136,11 @@ class LogAspectTest {
         @LogThis
         int nested(int x, int y) {
             return self.divide(x, y);
+        }
+
+        @LogThis(timed = false)
+        int noTime() {
+            return 1;
         }
     }
 }

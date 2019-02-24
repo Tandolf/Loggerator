@@ -9,6 +9,7 @@ public class LoggeratorProperties {
 
     private boolean prettyPrint;
     private Filter filter;
+    private boolean timeTransactions = true;
 
     @Data
     public static class Filter {

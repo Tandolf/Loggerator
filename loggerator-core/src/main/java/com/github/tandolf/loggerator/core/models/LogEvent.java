@@ -10,4 +10,6 @@ public interface LogEvent {
     void end(long currentTimeMillis);
 
     void push(LogData logData);
+
+    boolean isTimed();
 }

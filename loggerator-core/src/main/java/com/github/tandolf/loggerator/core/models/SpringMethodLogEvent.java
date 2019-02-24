@@ -8,12 +8,15 @@ public class SpringMethodLogEvent implements LogEvent {
 
     private ProceedingJoinPoint joinPoint;
     private final MethodData.Builder builder;
+    private boolean timed;
 
-    public SpringMethodLogEvent(ProceedingJoinPoint joinPoint) {
+    public SpringMethodLogEvent(ProceedingJoinPoint joinPoint, boolean timed) {
         this.joinPoint = joinPoint;
         builder = MethodData.builder().name(getName(joinPoint.getSignature()))
                 .args(joinPoint.getArgs())
                 .thread(Thread.currentThread().getName());
+
+        this.timed = timed;
     }
 
     @Override
@@ -56,5 +59,10 @@ public class SpringMethodLogEvent implements LogEvent {
     @Override
     public void push(LogData logData) {
         builder.push(logData);
+    }
+
+    @Override
+    public boolean isTimed() {
+        return timed;
     }
 }

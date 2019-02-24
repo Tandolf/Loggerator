@@ -10,6 +10,7 @@ All properties should be prefixed with "loggerator."
 | Property                              | Default           | Description  |
 | :-------------                        |:-------------     | :-----|
 | pretty-print               | false             | Will print logs in pretty print format in the console |
+| time-transactions                 | true              | Global setting to enable/disable timekeeping of logEvents |
 | filter.active                     | true              | Activate logging of incoming requests |
 | filter.include-payload            | false             | Will log incoming payloads if filter is active |
 | filter.include-query-string       | false             | Will append and log the query string ontop of incoming url |
@@ -17,7 +18,7 @@ All properties should be prefixed with "loggerator."
 | filter.url-patterns.include       | {}                | ant pattern define what url's filter should work on |
 | filter.url-patterns.exclude       | {}                | ant pattern define what url's filter should not work on |
 
-### @LogThis
+## @LogThis
 
 Method annotation to use when you want to log a method. 
 
